@@ -1,0 +1,23 @@
+FROM php:8.4-fpm
+
+# 安裝系統相依套件 + PHP Extensions
+RUN apt-get update && apt-get install -y \
+    git unzip curl gnupg2 ca-certificates \
+    libpng-dev libjpeg62-turbo-dev libfreetype6-dev \
+    libonig-dev libxml2-dev zip libzip-dev \
+    && docker-php-ext-install pdo_mysql mbstring zip gd
+
+# 安裝 Node.js 20 和 npm
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && node -v \
+    && npm -v
+
+# 複製 Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# 設定工作目錄
+WORKDIR /var/www
+
+# 權限調整
+RUN chown -R www-data:www-data /var/www
